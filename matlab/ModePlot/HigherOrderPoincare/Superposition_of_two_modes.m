@@ -2,14 +2,14 @@ clear all
 close all
 clc
 %%% Topological charge
-l1=1;
-l2=0;
+l1=2; %North pole
+l2=0; %South pole
 %%% Radial index
 p1=0;
 p2=0;
 %%% Poincare sphere angle
-phi=0;
-thita=3*pi/2;
+phi=0; %latitude
+thita=pi/2; %longitude
 
 %%% Parameters
 w=1; %Beam waist
@@ -21,7 +21,7 @@ R=z+zr^2/z; %Beam curvature
 W=w*(1+(z/zr)^2)^0.5; %Beam size
 
 %%% Polarizer angle 
-angle=input('polarizer angle: '); %thita=-1 → no polarizer
+angle=-1;%input('polarizer angle: '); %thita=-1 → no polarizer
 
 %%%%%%%%%%%%%%Intensity plot%%%%%%%%%%%%%%%%%%%%
 %%% x-y　coordinate
@@ -52,7 +52,7 @@ i_r=real(sqrt(Ex_i.^2+Ey_i.^2));
 
 %%%%%%%%%%%%%%Quiver plot%%%%%%%%%%%%%%%%%%%%
 %%% x-y　coordinate
-N2=20;
+N2=8;
 X2=linspace(-L,L,N2);
 Y2=linspace(-L,L,N2);
 [x2,y2]=meshgrid(X2,Y2);
@@ -66,31 +66,30 @@ LG2_q=LGmode(p2,l2,r2,phi2,z,w,lam);
 
 %%% angular frequency ω
 one_q=ones(size(phi2,1));
-o_q=one_q.*(pi/20);
+o_q=one_q.*(pi/30);
 
-for t = 0:200
-    imagesc([-L L],[-L L],i_r);
-    hold on
+imagesc([-L L],[-L L],i_r);
+%colormap('gray')
+hold on
+
+for t = 0:60
     %%%North pole of Poincare sphere
     E1_q=sin(thita/2)*exp(1j*phi/2).*exp(1j.*(l1.*phi2+t*o_q)).*LG1_q;  %ℓ=1
     %%%South pole
-    E2_q=cos(thita/2)*exp(-1j*phi/2).*exp(1j.*(-l2.*phi2+t*o_q)).*LG2_q; %ℓ=-1
+    E2_q=cos(thita/2)*exp(-1j*phi/2).*exp(1j.*(l2.*phi2+t*o_q)).*LG2_q; %ℓ=-1
     %%%|LHC> ℓ=1
     ex1_q=real(E1_q);
     ey1_q=real(-1j.*E1_q);
     %%%|RHC> ℓ=-1
     ex2_q=real(E2_q);
     ey2_q=real(1j.*E2_q);
-
+    
     ex_q=ex1_q+ex2_q;
     ey_q=ey1_q+ey2_q;
     [Ex_q,Ey_q]=polarizer(angle,ex_q,ey_q);
-
-    q=quiver(x2,y2,Ex_q,Ey_q,'off');
-    q.LineWidth=1;
-    q.Color='red';
-    colormap("gray")
-    shading interp; lighting phong; view(2); axis equal; axis tight; axis off;
-    hold off
-    pause(0.05)
+    Ex=Ex_q./1.2+x2;
+    Ey=Ey_q./1.2+y2;
+    axis equal; axis off;
+    scatter(Ex,Ey,'.','red')        
+    pause(0.005)
 end
